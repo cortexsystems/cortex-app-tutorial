@@ -1,0 +1,23 @@
+{
+  "extends": ["eslint:recommended", "xo", "google"], 
+  "globals": {
+    "console": false,
+    "window": false,
+    "module": false,
+    "inject": false
+  },
+  "parserOptions": {
+    "ecmaVersion": 7,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "modules": true
+    }
+  },
+  "rules": {
+    "no-console": 0,
+    "require-jsdoc": 0,
+    "indent": ["error", 2, {
+      "SwitchCase": 1
+    }]
+  }
+}

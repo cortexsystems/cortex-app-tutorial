@@ -1,0 +1,27 @@
+{
+    "name": "com.vistarmedia.apps.tutorial",
+    "version": "1.0.0",
+    "displayName": "Cortex App Tutorial",
+    "description": "A step by step tutorial to start Cortex app development",
+    "author": "Cortex",
+    "email": "support@cortexpowered.com",
+    "homepage": "http://vistarmedia.com",
+    "type": "application",
+    "assets": {
+        "icon128": "",
+        "icon256": "./app_assets/icon256.png",
+        "icon512": "",
+        "screenshot1": "./app_assets/screenshot1.jpeg",
+        "screenshot2": "./app_assets/screenshot2.jpeg",
+        "screenshot3": "./app_assets/screenshot3.jpeg",
+        "screenshot4": "",
+        "screenshot5": ""
+    },
+    "parameters": [
+        {
+            "name": "cortex.tutorial.duration",
+            "default": "10000",
+            "description": "The duration in milliseconds each image will stay on the screen"
+        }
+    ]
+}

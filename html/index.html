@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Cortex Tutorial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        background-color: #000;
+      }
+
+      #container {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        position: relative;
+      }
+
+      #container img {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        position: absolute;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="bundle.js"></script>
+  </body>
+</html>
