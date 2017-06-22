@@ -168,4 +168,168 @@ window.Cortex.scheduler.onPrepare((offer) => view.prepare(offer));
 `window.Cortex.scheduler.onPrepare()` is used to register a content preperation callback. The player will use this callback to ask the app to prepare a scene.
 
 ### Content Preparation
-Cortex player displays content on screen in fixed time slots. It has a content display loop that runs indefinitely. Because the player handles the loop itself, the apps don't need to maintain a loop to generate and play content. Instead, it registers a callback for content preparation to the player. The player will regularly call this callback whenever it wants to show an app. 
+Cortex player displays content on screen in fixed time slots. It has a content display loop that runs indefinitely. The apps don't need to maintain a loop to generate and play content since the player handles the loop itself. Instead, it registers a callback for content preparation to the player. The player will regularly call this callback whenever it wants to show an app.
+
+The main job of the app is to prepare some content when the player asks and later on render it on screen. At prepare time, the app is not visible on screen so it is safe to perform heavy functions like DOM modification, resource downloads, etc. Player will pass a callback to the prepare listener. The app can use this callback to let the player whether it successfully prepared content or not. Here is the common flow of the prepare callback:
+
+```javascript
+class App {
+  onPrepare(offer) {
+    // App received a prepare() request from the player.
+    // At this stage the app is still in the background. We can download content,
+    // make DOM modifications, or perform any other resource intensive tasks.
+    this.prepareSomeContent()
+      .then((someView) => {
+        // Content is ready. Let the player know about this:
+        offer(someView);
+      }).catch((err) => {
+        // App failed to prepare content. Perhaps a download failed or some other
+        // unexpected error occurred. Let the player know about this by calling offer
+        // with no arguments. Player will move on to another app and make another prepare()
+        // call to this app in future.
+        offer();
+      });
+  }
+}
+```
+
+In the above flow, whenever we receive the `prepare()` request, we start to work on the content with `prepareSomeContent()`. _It is **very important** for the apps to use only offline content when it is visible on the screen_. Otherwise, the app might end up displaying partial content when it is visible on screen. Once it is guarateed that all the content is stored on disk, the app can generate the actual view function and pass it to the player. Here is the actual `prepare()` code of this app:
+
+```javascript
+prepare(offer) {
+    if (this.index >= IMAGES.length) {
+      this.index = 0;
+    }
+
+    const container = window.document.getElementById(CONTAINER_ID);
+
+    const url = IMAGES[this.index];
+    this.index += 1;
+
+    this.createDOMNode(url).then((node) => {
+      // Render the node.
+    }).catch((e) => {
+      console.error('Failed to create a DOM node.', {url: url, error: e});
+      offer();
+    });
+  }
+```
+
+This app only uses static images we are shipping with the app package (see the `images/` directory).
+We don't need to download content from a remote server. So the only preparation we do is to create the
+DOM node for the next image to be displayed:
+
+```javascript
+  createDOMNode(url) {
+    return new Promise((resolve, reject) => {
+      const node = window.document.createElement('img');
+      node.id = url;
+      node.src = url;
+      node.onload = () => {
+        resolve(node);
+      };
+      node.onerror = reject;
+    });
+  }
+```
+
+`createDOMNode` takes a url and returns a promise that will resolve only when we successfully create an `<img>` node.
+Note that we don't actually attach the newly created node to the DOM tree yet. Keep in mind that this app might already be
+visible on screen displaying another image. If we attach the new image now, we will modify the screen and cut off the old
+slot early. To avoid such problems it is strongly recommended to only modify DOM nodes when the player renders your view
+function. In other words, on a `prepare()` call, we only create DOM notes and we attach them to the tree only in the view
+function we pass to the `offer()`.
+
+Another important point to note is that we rely on `onload` and `onerror` callbacks of the `<img>` node. This forces the
+player to decode and load the image in memory, which further assures the content display will be smooth. In fact, if your
+app is going to work on large images it is recommended to keep the nodes in memory for as long as possible. A common strategy
+is to keep the `<img>` nodes attached to the DOM but use CSS attributes to hide them when they are not needed.
+
+It is important for the `prepare()` calls to always return. Whether it's a success or error, make sure you always call `offer()`. Otherwise, the player will keep waiting for a response, potentially affecting the health of your app.
+
+### Content Rendering
+From the player's perspective, each app is supposed to do one thing only, like displaying train times or showing
+weather information on screen. With each `prepare()` call, the app gets a chance to submit a view to the player.
+You can think of a view as a single page display. Views are essentially javascript functions that modify the DOM to display
+something on screen. Once the DOM is modified, the view function will run for some time (slot duration) and then the player
+will move on to the next view. The next view may or may not be from the same app.
+
+View functions are structured as follows:
+
+```javascript
+function view(done) {
+  makeDOMModifications();
+  waitForSomeTime();
+  done();
+}
+```
+
+Right at the beginning, the view function makes DOM modifications like attaching an image node to the DOM. Then it waits
+for some time. This duration is usually predefined by you. If you want an image to be displayed on screen for 15 seconds
+you can simply use a timer to sleep for 15 seconds and then call the `done()` function to let the player know that the view
+is completed. You can also use DOM events to fire the `done()` call. For instance, if you are playing a video file, you can
+fire the `done()` callback when the video file finishes.
+
+Here is the view function generated by this app:
+```javascript
+    // Redacted...
+    this.createDOMNode(url).then((node) => {
+      const view = (done) => {
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
+
+        container.appendChild(node);
+        window.setTimeout(done, this.duration);
+      };
+
+      offer(view, {label: url, ttl: 60 * 60 * 1000});
+    }).catch((e) => {
+      // Redacted...
+    });
+```
+
+In this case, the view function starts by clearing the `container` first, to make sure we don't have any other images
+from older runs. Then it attaches the newly created `<img>` node to the DOM:
+
+```
+container.appendChild(node);
+```
+
+At this stage the image will be visible on the screen. The only thing remains for the view is to wait for some time.
+We simply use the `setTimeout` function to call the `done()` after waiting for `this.duration` milliseconds.
+
+Note that we generated this function after the `createDOMNode()` resolves. It is up to you to define the app flow,
+you may create view functions beforehand as long as they don't rely on network resources.
+
+When `createDOMNode()` resolves, the very last step is to pass the new view to the player. We use the `offer()` callback
+to submit the view function to the player. You may pass some options to the `offer()` about the new view. The full list
+of options can be found in Cortex App API docs (contact support@ if you don't have access to the docs).
+
+The entire `prepare()` and `offer()` flow is asynchronous. When you are generating the view function it is **not** guaranteed
+that the view will be used by the player any time soon. If you want to display the current time make sure your view function
+uses the latest time:
+
+```javascript
+// WRONG: now is the time we create the view.
+now = new Date();
+view(done) {
+  displayTime(now);
+}
+
+// CORRECT: now is the time we display the view.
+view(done) {
+  now = new Date();
+  displayTime(now);
+}
+```
+
+## Deployment
+Once your app is ready you can pack it and upload it to Fleet. To create an app package, run the following command on your
+terminal:
+
+```bash
+make pack
+```
+
+This command will generate an app zip file under `./dist`. You can now upload it on Fleet and create a strategy for your player.
