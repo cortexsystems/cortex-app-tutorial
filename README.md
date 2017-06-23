@@ -2,7 +2,7 @@
 
 The Cortex player provides a hardware agnostic environment for app developers. Cortex apps are  light-weight single page web applications built with a framework that follows Digital Out-Of-Home best practices. Unlike standard web applications, Cortex apps have access to the Cortex App API at runtime. Using this API, apps can access hardware resources or communicate to the Cortex backend.
 
-In this tutorial we are going to build a simple functioning app. The final code lives in this repository under `src`.
+In this tutorial we are going to build a simple app that displays several images in a loop. The final code lives in this repository under `src`.
 
 ## Application Package
 
