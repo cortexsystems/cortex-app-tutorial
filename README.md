@@ -1,12 +1,12 @@
 # Cortex Apps
 
-Cortex player provides a hardware agnostic environment for app developers. Cortex apps are essentially light-weight single page web applications built with a framework that follows Digital Out-Of-Home best practices. Unlike standard web applications, Cortex apps have access to the Cortex App API at runtime. Using this API, apps can access hardware resources or communicate to the Cortex backend.
+The Cortex player provides a hardware agnostic environment for app developers. Cortex apps are  light-weight single page web applications built with a framework that follows Digital Out-Of-Home best practices. Unlike standard web applications, Cortex apps have access to the Cortex App API at runtime. Using this API, apps can access hardware resources or communicate to the Cortex backend.
 
 In this tutorial we are going to build a simple functioning app. The final code lives in this repository under `src`.
 
 ## Application Package
 
-Before diving into the details of how to build an app, let's go over the final package first. After writing the code, you are expected to build an app package and upload it to `Fleet`. App packages are simple zip files that expects at least the following files at the **top level**:
+Before diving into the details of how to build an app, let's go over the final package first. After writing the code, you are expected to build an app package and upload it to `Fleet`. App packages are simple zip files that expect at least the following files at the **top level**:
 
     .
     ├── index.html             # Main entry point for your app.
@@ -14,9 +14,9 @@ Before diving into the details of how to build an app, let's go over the final p
     ├── README.md              # Includes information about the app.
     ├── manifest.json          # Provides meta information about your application.
     
-When an app deployed to a player, the player will extract the zip file and simply run the `index.html` file on a browser-like environment. As long as you follow the web standards, you are free to structure your app the way you want. However, the player enforces some restrictions to make sure your app doesn't interrupt the overall on-screen experience.
+When an app is deployed to a player, the player will extract the zip file and simply run the `index.html` file in a browser-like environment. As long as you follow web standards, you are free to structure your app the way you want. However, the player enforces some restrictions to maintain a smooth on-screen experience.
 
-    It is highly recommended to keep CHANGELOG.md and README.md up to date as they will be very valuable
+    It is highly recommended that you keep CHANGELOG.md and README.md up to date as they will be very valuable
     for the users of your app once you make it available on Fleet.
     
 `manifest.json` is a special file you need to include in the app package. Here is the manifest of this application:
@@ -55,11 +55,11 @@ Cortex will use this file to extract information about your app. This informatio
 
 - `name`: App names are unique identifiers. They are expected to follow the reverse domain name format. You can only use the domain names associated with your account. Cortex support can help you with your account setup.
 - `version`: App version number. Cortex apps follow [semantic versioning](http://semver.org/) and app versions become immutable once they are uploaded to Fleet. In other words, you can't upload the same app name / version pair twice.
-- `assets`: This section tells Fleet where to find app icons and screenshots. The icons and screenshots will be used on Fleet app store once you upload your app. The values you provide needs to resolve to real files otherwise Fleet will reject the app. For instance, in this app's manifest, all of the assets are stored under the `app_assets` folder at the root level of the zip file. That is why the manifest uses the relative paths like `./app_assets/icon256.png`. You are free to store the assets anywhere in the zip file as long as the paths you provide are correct.
-- `parameters`: This section declares configuration parameters for the app. Parameters is a convinient way of modifying the app behavior at runtime. You can change parameter values at network and player level. Before starting your app, Cortex will compile and pass the final set of parameters to the app. For this application, we tell Cortex that this app uses `cortex.tutorial.duration` parameter.
+- `assets`: This section tells Fleet where to find app icons and screenshots. The icons and screenshots will be used within the Fleet app store once you upload your app. The values you provide need to resolve to real files otherwise Fleet will reject the app. For instance, in this app's manifest, all of the assets are stored under the `app_assets` folder at the root level of the zip file. That is why the manifest uses relative paths like `./app_assets/icon256.png`. You are free to store the assets anywhere in the zip file as long as the paths you provide are correct.
+- `parameters`: This section declares configuration parameters for the app. Parameters are a convinient way of modifying the app behavior at runtime. You can change parameter values at the network and device level. Before starting your app, Cortex will compile and pass the final set of parameters to the app. For this application, we tell Cortex that this app uses a `cortex.tutorial.duration` parameter.
 
 ## Project Setup
-This repository provides a good starting point to build Cortex apps. It uses some of the modern JavaScript development tools like `webpack` and `eslint`. Of course, you are free to set up the project the way you want as long as the final compiled application follows the restrictions outlined in the previous section. This project structure transpiles ES6 code and copies the necessary files like `manifest.json` and `CHANGELOG.md` to the final app build folder. It can also build the final app zip package ready to be uploaded to Fleet.
+This repository provides a good starting point to build Cortex apps. It uses some of the modern JavaScript development tools like `webpack` and `eslint`. Of course, you are free to set up the project the way you want to as long as the final compiled application follows the restrictions outlined in the previous section. This project structure transpiles ES6 code and copies the necessary files like `manifest.json` and `CHANGELOG.md` to the final app build folder. It can also build the final app zip package ready to be uploaded to Fleet.
 
 Here is the directory structure of this project:
 
@@ -79,19 +79,19 @@ Here is the directory structure of this project:
 
 To build an app version:
 ```
-$ npm install     # Installes dependencies
-$ make build      # Transpiles the source code and put everything under ./build
+$ npm install     # Installs dependencies
+$ make build      # Transpiles the source code and puts everything under ./build
 $ make pack       # Creates the final app package under ./dist
 ```
 
 ## Cortex App Lifecycle
-Generally, Cortex apps can be broken down into three phases:
+Generally, the Cortex app lifecycle has three phases:
 
-1. **Initialization**. At this stage, app initializes itself using the runtime parameters.
-2. **Content preparation**. App is expected to download any resources to the local disk and do any other offline work.
+1. **Initialization**. At this stage, the app initializes itself using the runtime parameters.
+2. **Content preparation**. Here, the app is expected to download any resources to the local disk and do any other offline work.
 3. **Content rendering**. Finally, the content prepared in the previous step will be rendered and displayed on screen.
 
-Once started, the player keeps the app running in the background indefinitely. Apps spend most of their time hidden in the background working on preparing content (e.g. parse an RSS feed, download a video, etc.). Only occasionally the player will put the app in the third phase and make it's output visible on screen.
+Once started, the player keeps the app running in the background indefinitely. Apps spend most of their time hidden in the background working on preparing content (e.g. parsing an RSS feed, downloading a video, etc.). Only occasionally will the player put the app in the third phase and make its output visible on screen.
 
 It is important to keep the app as light as possible. The app should do the heavy lifting in the background and make sure it uses **only** offline content for rendering. For instance, if the app is supposed to play a video in the rendering phase, it should not enter the rendering phase until it fully downloads the video to local disk.
 
@@ -133,7 +133,7 @@ function main() {
 module.exports = main();
 ```
 
-The first thing apps should do is to listen to the `cortex-ready` event. The player will fire this event when the app is fully loaded. Cortex API will not be available before this event is received.
+The first thing apps should do is to listen to the `cortex-ready` event. The player will fire this event when the app is fully loaded. The Cortex API will not be available before this event is received.
 ```javascript
 window.addEventListener('cortex-ready', function() {
   // Use Cortex API
@@ -141,7 +141,7 @@ window.addEventListener('cortex-ready', function() {
 });
 ```
 
-Inside the `cortex-ready` handler, the first thing apps generally do is to read the runtime config:
+Inside the `cortex-ready` handler, the first thing apps generally do is read the runtime config:
 
 ```javascript
 window.Cortex.app.getConfig().then(function(config) {
@@ -168,9 +168,9 @@ window.Cortex.scheduler.onPrepare((offer) => view.prepare(offer));
 `window.Cortex.scheduler.onPrepare()` is used to register a content preperation callback. The player will use this callback to ask the app to prepare a scene.
 
 ### Content Preparation
-Cortex player displays content on screen in fixed time slots. It has a content display loop that runs indefinitely. The apps don't need to maintain a loop to generate and play content since the player handles the loop itself. Instead, it registers a callback for content preparation to the player. The player will regularly call this callback whenever it wants to show an app.
+The Cortex player displays content on-screen in fixed time slots. It has a content display loop that runs indefinitely. The apps don't need to maintain a loop to generate and play content since the player handles the loop itself. Instead, apps register a callback for content preparation to the player. The player will regularly call this callback whenever it wants to show an app.
 
-The main job of the app is to prepare some content when the player asks and later on render it on screen. At prepare time, the app is not visible on screen so it is safe to perform heavy functions like DOM modification, resource downloads, etc. Player will pass a callback to the prepare listener. The app can use this callback to let the player whether it successfully prepared content or not. Here is the common flow of the prepare callback:
+The main job of the app is to prepare some content when the player asks and later on render it on screen. At prepare time, the app is not visible on screen so it is safe to perform heavy functions like DOM modification, resource downloads, etc. The player will pass a callback to the prepare listener. The app can use this callback to let the player know whether it successfully prepared content or not. Here is the common flow of the prepare callback:
 
 ```javascript
 class App {
@@ -193,7 +193,7 @@ class App {
 }
 ```
 
-In the above flow, whenever we receive the `prepare()` request, we start to work on the content with `prepareSomeContent()`. _It is **very important** for the apps to use only offline content when it is visible on the screen_. Otherwise, the app might end up displaying partial content when it is visible on screen. Once it is guarateed that all the content is stored on disk, the app can generate the actual view function and pass it to the player. Here is the actual `prepare()` code of this app:
+In the above flow, whenever we receive the `prepare()` request, we start to work on the content with `prepareSomeContent()`. _It is **very important** for an app to use only offline content when visible on the screen_. Otherwise, the app might end up displaying partial content when it is visible on screen. Once all the content is stored on the disk, the app can generate the actual view function and pass it to the player. Here is the actual `prepare()` code of this app:
 
 ```javascript
 prepare(offer) {
@@ -245,11 +245,10 @@ player to decode and load the image in memory, which further assures the content
 app is going to work on large images it is recommended to keep the nodes in memory for as long as possible. A common strategy
 is to keep the `<img>` nodes attached to the DOM but use CSS attributes to hide them when they are not needed.
 
-It is important for the `prepare()` calls to always return. Whether it's a success or error, make sure you always call `offer()`. Otherwise, the player will keep waiting for a response, potentially affecting the health of your app.
+It is important for the `prepare()` calls to always return. For either a success or error, make sure you always call `offer()`. Otherwise, the player will keep waiting for a response, potentially affecting the health of your app.
 
 ### Content Rendering
-From the player's perspective, each app is supposed to do one thing only, like displaying train times or showing
-weather information on screen. With each `prepare()` call, the app gets a chance to submit a view to the player.
+From the player's perspective, each app is supposed to do one thing only, like displaying train times or weather information on the screen. With each `prepare()` call, the app gets a chance to submit a view to the player.
 You can think of a view as a single page display. Views are essentially javascript functions that modify the DOM to display
 something on screen. Once the DOM is modified, the view function will run for some time (slot duration) and then the player
 will move on to the next view. The next view may or may not be from the same app.
@@ -296,7 +295,7 @@ from older runs. Then it attaches the newly created `<img>` node to the DOM:
 container.appendChild(node);
 ```
 
-At this stage the image will be visible on the screen. The only thing remains for the view is to wait for some time.
+At this stage the image will be visible on the screen. The only thing left for the view is to wait for some time.
 We simply use the `setTimeout` function to call the `done()` after waiting for `this.duration` milliseconds.
 
 Note that we generated this function after the `createDOMNode()` resolves. It is up to you to define the app flow,
@@ -304,7 +303,7 @@ you may create view functions beforehand as long as they don't rely on network r
 
 When `createDOMNode()` resolves, the very last step is to pass the new view to the player. We use the `offer()` callback
 to submit the view function to the player. You may pass some options to the `offer()` about the new view. The full list
-of options can be found in Cortex App API docs (contact support@ if you don't have access to the docs).
+of options can be found in the Cortex App API docs (contact support@ if you don't have access to the docs).
 
 The entire `prepare()` and `offer()` flow is asynchronous. When you are generating the view function it is **not** guaranteed
 that the view will be used by the player any time soon. If you want to display the current time make sure your view function
