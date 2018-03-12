@@ -7,7 +7,9 @@ function main() {
       console.info('Application will be initialized.', {duration: duration});
 
       const view = new View(duration);
-      window.Cortex.scheduler.onPrepare((offer) => view.prepare(offer));
+      window.Cortex.scheduler.onPrepare((offer, container) => {
+        view.prepare(offer, container);
+      });
     }).catch(function(err) {
       console.error('Failed to initialize the application: ', err);
       throw err;

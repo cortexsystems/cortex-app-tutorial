@@ -1,6 +1,6 @@
 {
   "name": "cortex-app-tutorial",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A step by step tutorial to start Cortex app development",
   "main": "index.js",
   "scripts": {

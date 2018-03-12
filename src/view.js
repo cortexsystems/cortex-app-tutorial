@@ -4,31 +4,24 @@ const IMAGES = [
   './images/3.jpeg',
 ];
 
-const CONTAINER_ID = 'container';
-
 class View {
   constructor(duration) {
     this.duration = duration;
     this.index = 0;
   }
 
-  prepare(offer) {
+  prepare(offer, container) {
     if (this.index >= IMAGES.length) {
       this.index = 0;
     }
-
-    const container = window.document.getElementById(CONTAINER_ID);
 
     const url = IMAGES[this.index];
     this.index += 1;
 
     this.createDOMNode(url).then((node) => {
-      const view = (done) => {
-        while (container.firstChild) {
-          container.removeChild(container.firstChild);
-        }
-
+      const view = (done, begin) => {
         container.appendChild(node);
+        begin();
         window.setTimeout(done, this.duration);
       };
 
